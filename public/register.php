@@ -2,63 +2,60 @@
 
 /*Подключаем необходимые нам файлы*/
 require_once "../src/ini.php";
+require_once "./inc/login.php";
 
-/*Ищем куку*/
-if (isset($_COOKIE["abiturientID"])) {
-    $abiturientID = $authorizator->checkCookie($_COOKIE["abiturientID"]);
-} else {
-    $abiturientID = "";
-}
-/*Получаем нового или старого абитуриента, если он уже регистрировался на сайте*/
-$abiturient = $authorizator->logIn($abiturientID);
 /*Добавляем абитуриента в валидатор*/
 $validator->addAbiturient($abiturient);
 if($_SERVER["REQUEST_METHOD"] == "POST") {
-    /*Массив для заполнения модели*/
-    $values = [
-        "name"        => "",
-        "surname"     => "",
-        "groupNumber" => "",
-        "points"      => "",
-        "email"       => "",
-        "year"        => "",
-        "gender"      => "",
-        "loko"        => ""
+    /*Проверяем post токен на CSRF*/
+    if (!$authorizator->checkTokenForCSRF($_POST["token"], $abiturient->getToken())) {
+        throw new Exception("The token is not verified. Possible CSRF.");
+    }
+    /*Массив свойств для заполнения модели*/
+    $properties = [
+        "email",
+        "groupNumber",
+        "name",
+        "surname",
+        "year",
+        "points",
+        "gender",
+        "loko"
     ];
-    foreach ($values as $key => &$value) {
-        if (!empty($_POST[$key])) {
+    /*Будущий массив значений*/
+    $values = [];
+    foreach ($properties as $property) {
+        if (!empty($_POST[$property])) {
             /*Убираем лишние пробелы из принятых данных*/
-            $value = ViewHelper::fixRegistrationInput(strval($_POST[$key]));
+            $values[$property] = ViewHelper::fixRegistrationInput($_POST[$property]);
         }
     }
     /*Инициализурем свойства объекта*/
-    $abiturient->setFields($values);
+    $abiturient->setProperties($values);
     /*Проверяем на ошибки*/
-    $errorList = $validator->createErrorsList($abiturientID);
+    $errorList = $validator->createErrorsList();
     /*Если ошибок нет*/
     if (empty($errorList)) {
         /*Если студент редактирует данные*/
-        if ($abiturientID) {
+        if ($abiturient->isAbiturientRegistred()) {
             /*Обновляем запись в бд*/
-            $gateway->updateAbiturient($abiturient, $abiturientID);
+            $gateway->updateAbiturient($abiturient);
             /*Делаем редирект*/
             header("Location: index.php");
             exit();
-        /*Если студент первый раз на сайте*/
-        } else {
-            /*Добавляем его в бд*/
-            $gateway->addAbiturient($abiturient);
-            /*Ставим куку*/
-            $authorizator->setCookie();
-            /*Делаем редирект*/
-            header("Location: index.php?notify=registred");
-            exit();
         }
+        /*Если студент первый раз на сайте*/
+        /*Добавляем его в бд*/
+        $gateway->addAbiturient($abiturient);
+        /*Ставим куки*/
+        $authorizator->setAbiturientIDToCookie($gateway->getLastInsertID());
+        $authorizator->setTokenToCookie($abiturient->getToken());
+        /*Делаем редирект*/
+        header("Location: index.php?notify=registred");
+        exit();
     }
 }
 /*Название шапки*/
 $pageTitle = "Регистрация";
-/*Навигационное меню*/
-$navigationList = file_get_contents("../templates/inc/navigationMenu3.html");
 /*Вставляем шаблон*/
 include "../templates/register.html";

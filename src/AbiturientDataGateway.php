@@ -12,8 +12,8 @@ class AbiturientDataGateway {
     public function addAbiturient(Abiturient $abiturient)
     {
         $query = "INSERT INTO abiturient
-                             (name, surname, gender, groupNumber, points, email, year, loko)
-                              VALUES (:name, :surname, :gender, :groupNumber, :points, :email, :year, :loko)";
+                             (name, surname, gender, groupNumber, points, email, year, loko, token)
+                              VALUES (:name, :surname, :gender, :groupNumber, :points, :email, :year, :loko, :token)";
         $stmt = $this->pdo->prepare($query);
         /*Добавляем данные одним массивом*/
         $stmt->execute($this->convertAbiturientToArray($abiturient));
@@ -35,7 +35,7 @@ class AbiturientDataGateway {
     }
 
     /*Обновление записи в бд*/
-    public function updateAbiturient(Abiturient $abiturient, $abiturientID)
+    public function updateAbiturient(Abiturient $abiturient)
     {
         $query = "UPDATE abiturient
                      SET name         = :name,
@@ -45,9 +45,9 @@ class AbiturientDataGateway {
                          groupNumber  = :groupNumber,
                          points       = :points,
                          year         = :year,
-                         loko         = :loko
-                   WHERE abiturientID = $abiturientID";
-        /*$abiturientID уже проверялось в контроллере register.php методом checkCookie()*/
+                         loko         = :loko,
+                         token        = :token
+                   WHERE abiturientID = :abiturientID";
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($this->convertAbiturientToArray($abiturient));
     }
@@ -63,8 +63,13 @@ class AbiturientDataGateway {
             "groupNumber"  => $abiturient->getGroupNumber(),
             "points"       => $abiturient->getPoints(),
             "year"         => $abiturient->getYear(),
-            "loko"         => $abiturient->getLoko()
+            "loko"         => $abiturient->getLoko(),
+            "token"        => $abiturient->getToken()
         ];
+        /*Если абитуриент зарегистрирован, бд не будет создавать ему новый ID*/
+        if ($abiturient->isAbiturientRegistred()) {
+            $array["abiturientID"] = $abiturient->getAbiturientID();
+        }
         return $array;
     }
 
@@ -86,23 +91,6 @@ class AbiturientDataGateway {
         return $order;
     }
 
-    /*Метод проверки cookie*/
-    public function isAbiturientIDExist($abiturientID)
-    {
-        $query = "SELECT COUNT(*)
-                    FROM abiturient
-                   WHERE abiturientID = :abiturientID";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(":abiturientID", $abiturientID);
-        $stmt->execute();
-        $counter = $stmt->fetchColumn();
-        if ($counter == 1) {;
-            return TRUE;
-        } else {
-            return FALSE;
-        }
-    }
-
     /*Метод получения последнего добавленго в базу ID*/
     public function getLastInsertID()
     {
@@ -112,7 +100,15 @@ class AbiturientDataGateway {
     /*Метод подсчета количества почтовых ящиков (с определенным именем)*/
     public function countEmails($email, $abiturientID)
     {
-        /*ID нужен чтобы не считать почтовый ящик, если он существует, того же абитуриента*/
+        /**
+         * Если бы пришло NULL значение, запрос поломался.
+         * Меняем на пустую строку(оно придет у незарег-го абитуриента,
+         * т.к. поля класса по умолчанию равны NULL)
+        */
+        if (empty($abiturientID)) {
+            $abiturientID = "";
+        }
+        /*ID нужен чтобы не подсчитать почтовый ящик того же абитуриента, если он существует*/
         $query = "SELECT COUNT(*)
                     FROM abiturient
                    WHERE email=:email AND
@@ -125,14 +121,14 @@ class AbiturientDataGateway {
         return $counter;
     }
 
-
     /*Метод подсчета количества абитурентов в бд*/
     public function countAbiturients($search)
     {
         /*Если строка запроса не пустая, будет использоваться дополнительный оператор WHERE*/
-        if ($search != NULL) {
+        if ($search) {
             $searchQuery = $this->createSearchQuery();
-            $search = "%$search%";
+            /*Готовим строку для запроса заменяя лишние символы на %*/
+            $search = $this->fixSearchString($search);
         } else {
             $searchQuery = "";
         }
@@ -156,13 +152,23 @@ class AbiturientDataGateway {
                  LIKE :search";
     }
 
+    /*Метод убирание из поисковой строки лишних символов*/
+    private function fixSearchString($search)
+    {
+        /*Меняем в строке поиска пробелы и знаки препинания на знак любого символа в поиске бд*/
+        $search = preg_replace("/[^\\w\\d]+/u", "%", $search);
+        /*Два процента впереди и в конце должны быть в любом случае*/
+        return "%$search%";
+    }
+
     /*Главный метод в котором мы получаем массив абитуриентов из бд на опр-ой странице с опр-ым кол-ом записей*/
     public function getAbiturientsInPage($limit, $offset, $sort, $search, $order)
     {
         /*Если строка запроса не пустая, будет использоваться дополнительный оператор WHERE*/
-        if ($search != NULL) {
+        if ($search) {
             $searchQuery = $this->createSearchQuery();
-            $search = "%$search%";
+            /*Убираем из строки поиска лишние символы*/
+            $search = $this->fixSearchString($search);
         } else {
             $searchQuery = "";
         }
@@ -175,7 +181,7 @@ class AbiturientDataGateway {
              $searchQuery
                     ORDER BY $sort $order
                     LIMIT :limit OFFSET :offset";
-        $stmt   = $this->pdo->prepare($query);
+        $stmt = $this->pdo->prepare($query);
         $stmt->bindValue(":limit",  $limit,  PDO::PARAM_INT);
         $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
         if (!empty($searchQuery)) {
@@ -185,6 +191,24 @@ class AbiturientDataGateway {
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Abiturient');
         $abiturients = $stmt->fetchAll();
         return $abiturients;
+    }
+
+    /*Метод проверки существования абитурента с определенным ID и токеном*/
+    public function isAbiturientExist($abiturientID, $token)
+    {
+        $query = "SELECT COUNT(*)
+                    FROM abiturient
+                   WHERE abiturientID = :abiturientID AND
+                         token        = :token";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->bindValue(":abiturientID", $abiturientID);
+        $stmt->bindValue(":token",        $token);
+        $stmt->execute();
+        $counter = $stmt->fetchColumn();
+        if ($counter == 1) {;
+            return TRUE;
+        }
+        return FALSE;
     }
 }
 

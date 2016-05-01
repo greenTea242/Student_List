@@ -17,41 +17,35 @@ class AbiturientValidator {
     }
 
     /*Метод создания списка ошибок который потом будет выводиться в шаблоне*/
-    public function createErrorsList($abiturientID)
+    public function createErrorsList()
     {
+        $properties = [
+            "email",
+            "groupNumber",
+            "name",
+            "surname",
+            "year",
+            "points",
+            "gender",
+            "loko"
+        ];
         $errList = [];
-        if (($error = $this->checkEmail($abiturientID)) !== TRUE) {
-            $errList["email"] = $error;
-        }
-        if (($error = $this->checkGroupNumber()) !== TRUE) {
-            $errList["groupNumber"] = $error;
-        }
-        if (($error = $this->checkName()) !== TRUE) {
-            $errList["name"] = $error;
-        }
-        if (($error = $this->checkSurname()) !== TRUE) {
-            $errList["surname"] = $error;
-        }
-        if (($error = $this->checkYear()) !== TRUE) {
-            $errList["year"] = $error;
-        }
-        if (($error = $this->checkPoints()) !== TRUE) {
-            $errList["points"] = $error;
-        }
-        if (($error = $this->checkGender()) !== TRUE) {
-            $errList["gender"] = $error;
-        }
-        if (($error = $this->checkLoko()) !== TRUE) {
-            $errList["loko"] = $error;
+        foreach ($properties as $property) {
+            $method = "check" . ucfirst($property);
+            $error = $this->$method();
+            if ($error !== TRUE) {
+                $errList[$property] = $error;
+            }
         }
         return $errList;
     }
 
     /*Метод проверки e-mail*/
-    private function checkEmail($abiturientID)
+    private function checkEmail()
     {
-        $email = $this->abiturient->getEmail();
-        $regexp = "/{$this->getRegExpForEmail()}/";
+        $email        = $this->abiturient->getEmail();
+        $abiturientID = $this->abiturient->getAbiturientID();
+        $regexp       = $this->getPHPRegExpForEmail();
         if (!preg_match($regexp, $email)) {
             return "Неправильно введен почтовый ящик!";
         /*Если в базе есть такой уже е-майл у другого студента*/
@@ -66,8 +60,8 @@ class AbiturientValidator {
     /*Метод проверки номера группы*/
     private function checkGroupNumber()
     {
-        $group = $this->abiturient->getGroupNumber();
-        $regexp = "/{$this->getRegExpForGroupNumber()}/u";
+        $group  = $this->abiturient->getGroupNumber();
+        $regexp = $this->getPHPRegExpForGroupNumber();
         if (!preg_match($regexp, $group)) {
             return "Название группы должно состоять из русских букв и цифр!";
         } elseif (mb_strlen($group) > 5) {
@@ -81,7 +75,7 @@ class AbiturientValidator {
     private function checkName()
     {
         $name = $this->abiturient->getName();
-        $regexp = "/{$this->getRegExpForName()}/u";
+        $regexp = $this->getPHPRegExpForName();
         if (!preg_match($regexp, $name)) {
             return "Введите правильное имя! Допустимы русские буквы, \" - \"(дефис) и \" ' \"(апостроф).";
         } else {
@@ -93,8 +87,8 @@ class AbiturientValidator {
     private function checkSurname()
     {
         $name = $this->abiturient->getSurname();
-        //Регулярка для имени и фамилии идентична
-        $regexp = "/{$this->getRegExpForName()}/u";
+        /*Регулярка для имени и фамилии идентична*/
+        $regexp = $this->getPHPRegExpForName();
         if (!preg_match($regexp, $name)) {
             return "Введите правильную фамилию! Допустимы русские буквы, \" - \"(дефис) и \" ' \"(апостроф).";
         } else {
@@ -106,7 +100,7 @@ class AbiturientValidator {
     private function checkYear()
     {
         $year = $this->abiturient->getYear();
-        $regexp = "/{$this->getRegExpForYear()}/";
+        $regexp = $this->getPHPRegExpForYear();
         if (!preg_match($regexp, $year)) {
             return "Введите корректный год рождения! Пример: 1994.";
         } else {
@@ -118,7 +112,7 @@ class AbiturientValidator {
     private function checkPoints()
     {
         $points = $this->abiturient->getPoints();
-        $regexp = "/{$this->getRegExpForPoints()}/u";
+        $regexp = $this->getPHPRegExpForPoints();
         if (!preg_match($regexp, $points)) {
             return "Введите корректное количество баллов! От 0 до 999.";
         } else {
@@ -136,7 +130,7 @@ class AbiturientValidator {
         }
     }
 
-    /*Метод проверки гесто жительства*/
+    /*Метод проверки места жительства*/
     private function checkLoko()
     {
         if (empty($this->abiturient->getLoko())) {
@@ -146,32 +140,56 @@ class AbiturientValidator {
         }
     }
 
-    /*Регулярки которые также используются в HTML5 паттернах*/
-    public function getRegExpForEmail()
+    /*Регулярки для языка PHP*/
+    public function getPHPRegExpForEmail()
     {
-        return '^([\s]*[A-Za-z0-9][\s]*){1,40}@([\s]*[A-Za-z][\s]*){1,13}.([\s]*[A-Za-z][\s]*){1,10}$';
+        return "/^([\\s]*[A-Za-z0-9][\\s]*){1,40}@([\\s]*[A-Za-z][\\s]*){1,13}.([\\s]*[A-Za-z][\\s]*){1,10}$/";
     }
 
-    public function getRegExpForGroupNumber()
+    public function getPHPRegExpForGroupNumber()
     {
-        return '^([\s]*[А-Яа-я0-9][\s]*){2,5}$';
+        return "/^([\\s]*[А-Яа-я0-9][\\s]*){2,5}$/u";
 
     }
 
-
-    public function getRegExpForName()
+    public function getPHPRegExpForName()
     {
-        return '^([\s]*[А-Яа-яЁё][\s]*[\'\-]?[\s]*){1,60}$';
+        return "/^([\\s]*[А-Яа-яЁё][\\s]*['-]?[\\s]*){1,60}$/u";
     }
 
-    public function getRegExpForYear()
+    public function getPHPRegExpForYear()
     {
-        return '^[\s]*(19|20)[0-9]{2}[\s]*$';
+        return "/^[\\s]*(19|20)[0-9]{2}[\\s]*$/";
     }
 
-    public function getRegExpForPoints()
+    public function getPHPRegExpForPoints()
     {
-        return '^([\s]*[0-9][\s]*){1,3}$';
+        return "/^([\\s]*[0-9][\\s]*){1,3}$/";
     }
 
+    /*Регулярки для HTML5*/
+    public function getHTML5RegExpForEmail()
+    {
+        return "^([\\s]*[A-Za-z0-9][\\s]*){1,40}@([\\s]*[A-Za-z][\\s]*){1,13}.([\\s]*[A-Za-z][\\s]*){1,10}$";
+    }
+
+    public function getHTML5RegExpForGroupNumber()
+    {
+        return "^([\\s]*[А-Яа-я0-9][\\s]*){2,5}$";
+    }
+
+    public function getHTML5RegExpForName()
+    {
+        return "^([\\s]*[А-Яа-яЁё][\\s]*['-]?[\\s]*){1,60}$";
+    }
+
+    public function getHTML5RegExpForYear()
+    {
+        return "^[\\s]*(19|20)[0-9]{2}[\\s]*$";
+    }
+
+    public function getHTML5RegExpForPoints()
+    {
+        return "^([\\s]*[0-9][\\s]*){1,3}$";
+    }
 }

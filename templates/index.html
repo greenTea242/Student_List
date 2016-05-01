@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <link href="./css/bootstrap/bootstrap.css" rel="stylesheet">
-    <link href="./css/style.css" rel="stylesheet">
-    <title>Список студентов</title>
+    <?php require_once("/inc/head.html"); ?>
 </head>
 <body>
 <div class="container">
@@ -12,8 +9,8 @@
         <?php require_once("/inc/header.html"); ?>
         <?php require_once("/inc/search.html"); ?>
     </nav>
-        <?php if (!empty($notify) == "registred"): ?>
-            <p>Поздравляю с успешной регистрацией!</p>
+        <?php if (!empty($notify) == Notifications::NOTIFY_REGISTERED): ?>
+            <p>Поздравляем с успешной регистрацией!</p>
         <?php endif; ?>
             <!--Если студент что-то ищет в поисковой форме-->
         <?php if (!empty($search)): ?>
@@ -22,7 +19,7 @@
                     <p>Ничего не найдено!</p>
                 <?php endif; ?>
         <!--Если в бд нету записей-->
-        <?php elseif ($counter == 0): ?>
+        <?php elseif ($numberOfAbiturients == 0): ?>
             <p>Список пуст, пока что..</p>
         <!--Если абитуриент не получил список (ввел page=235 при меньшем количестве страниц)-->
         <?php elseif (empty($abiturients)): ?>

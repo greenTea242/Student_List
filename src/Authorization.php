@@ -9,40 +9,68 @@ class Authorization {
         $this->gateway = $gateway;
     }
 
-    /*Метод установки куки с ID абитуриента*/
-    public function setCookie()
+    public function setAbiturientIDToCookie($abiturientID)
     {
-        setcookie("abiturientID", $this->gateway->getLastInsertID() , time() + (10 * 365 * 24 * 60 * 60));
+        setcookie("abiturientID", $abiturientID, time() + (10 * 365 * 24 * 60 * 60), "", "", "", 1);
     }
 
-    /*Метод проверки куки*/
-    public function checkCookie($abiturientID)
+    public function setTokenToCookie($token)
     {
-        $abiturientID = strval($abiturientID);
-        if ($this->gateway->isAbiturientIDExist($abiturientID)) {
-            return $abiturientID;
+        setcookie("token", $token, time() + (10 * 365 * 24 * 60 * 60), "", "", "", 1);
+    }
+
+    /*Метод проверки токена для защиты от CSRF*/
+    public function checkTokenForCSRF($token, $cookieToken)
+    {
+        if((strcmp($token, $cookieToken) !== 0)) {
+            return false;
         }
-        return false;
+        return true;
     }
 
     /*Метод получения абитуриента*/
-    public function logIn($abiturientID)
+    public function logIn($abiturientID, $token)
     {
-        /*Если кука есть, достаем абитуриента из нашей бд*/
-        if ($this->checkCookie($abiturientID)) {
+
+        if (!empty($abiturientID) &&
+            !empty($token)        &&
+            $this->gateway->isAbiturientExist($abiturientID, $token)) {
+            /*Если куки подтвердились - продлеваем ее и достаем абитуриента из нашей бд*/
+            $this->setTokenToCookie($token);
             return $this->gateway->selectAbiturient($abiturientID);
-        /*В противном случае - создаем нового абитируиента*/
-        } else {
-            return new Abiturient();
         }
+        /**
+         * Если абитуриент еще не получил личный токен.
+         * В отличии от ID, токены имеют и зарег-ые и незарег-ые пол-ли
+         */
+        elseif (empty($token)) {
+            $token = $this->createToken();
+        }
+        $abiturient = new Abiturient();
+        /*В дальнейшем токен будет вызываться через модель*/
+        $abiturient->setToken($token);
+        /*Продлеваем токен*/
+        $this->setTokenToCookie($token);
+        return $abiturient;
     }
 
+    /*Метод создания случайного токена*/
+    public function createToken()
+    {
+        $token = "";
+        $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $numChars = strlen($chars);
+        for ($i = 0; $i < 32; $i++) {
+            $symbol = substr($chars, mt_rand(0, $numChars - 1), 1);
+            $token = $token . $symbol;
+        }
+        return $token;
+    }
 
     /*Метод удаления куки*/
     public function logOut()
     {
         setcookie("abiturientID", "", time() - 3600);
-        header("Location: index.php");
-        exit();
+        setcookie("token",        "", time() - 3600);
     }
 }

@@ -1,32 +1,12 @@
 <?php
 
-//Класс статических полезных методов
+/*Класс статических полезных методов*/
 class ViewHelper {
 
-    /*Метод исправления поисковой строки*/
-    static function fixSearchString ($search)
-    {
-        /*Убираем из строки поиска знаки препинания*/
-        $search = preg_replace("/[^\\d\\w\\s]/u", "", $search);
-        /*Избавляемся от двух пробелов и больше, например*/
-        $search = ViewHelper::removeOneOrMoreSpace($search);
-        /*Меняем в строке поиска пробелы на знак любого символа в поиске бд*/
-        $search = preg_replace("/\\s/u", "%", $search);
-        /*Тримить в этом методе я не стал. Какая разница в пробелах между словами
-        и в пробелах перед ними, пусть везде будет '%'*/
-        return $search;
-    }
-
     /*Метод корректировки полученных данных из формы регистрации (trim + удаление лишних пробелов между словами*/
-    static function fixRegistrationInput ($value)
+    static function fixRegistrationInput ($string)
     {
-        return ViewHelper::removeOneOrMoreSpace(trim($value));
-    }
-
-    /*Метод убирания лишних пробелов*/
-    static function removeOneOrMoreSpace ($string)
-    {
-        return preg_replace("/[\\s]+/", " ", $string);
+        return preg_replace("/[\\s]+/", " ", trim(strval($string)));
     }
 
     /*Метод защиты ссылки*/
