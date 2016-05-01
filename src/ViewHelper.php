@@ -29,22 +29,45 @@ class ViewHelper {
     }
 
     /*Метод обводки найденных слов*/
-    static function paintFound($word, $search)
+    static function paintFound($string, $search)
     {
-        $word   = htmlspecialchars($word, ENT_QUOTES);
+        $string = htmlspecialchars($string, ENT_QUOTES);
         $search = htmlspecialchars($search, ENT_QUOTES);
         /*Если строка запроса состоит из нескольких слов, мы должны проверить каждое*/
-        $searchWords = explode(" ", $search);
+        $searchWords = preg_split("/[^\\w]+/ui", $search);
         /*Сортируем массив по убыванию значений*/
         usort($searchWords, function($a, $b) {
             return mb_strlen($b) - mb_strlen($a);
         });
-        foreach ($searchWords as $search) {
-            if (mb_strripos($word, $search) !== false) {
-                $word = preg_replace("/" . preg_quote($search) . "/ui", "<mark>$0</mark>", $word);
-                break;
+        /*Попытка через анонимную функцию*/
+        /**
+        $searchWords = array_map(function($search) {
+            $v = "/" . preg_quote($search) . "/ui";
+            return $search;
+        }, $searchWords);
+        $string = preg_replace_callback($searchWords, function (array $matches) {
+            var_dump($matches);
+            return "<mark>$matches[0]</mark>";
+        }, $string);
+         */
+        /**
+         * С таблицей будем работать как с поисковой строкой  - мы
+         * будем проверять каждое слово по отдельности.
+         * Знаков препинания там быть не может в отличие от поисковой строки,
+         * поэтому explode с пробелом, а не preg_split со знаками.
+         */
+        $words = explode(" ", $string);
+        foreach ($words as &$word) {
+            foreach ($searchWords as $search) {
+                if (mb_strripos($word, $search) !== false) {
+                    if (preg_match("<mark>", $word)) {
+                        continue;
+                    }
+                    $word = preg_replace("/" . preg_quote($search) . "/ui", "<mark>$0</mark>", $word);
+                }
             }
         }
-        return $word;
+        $string = implode(" ", $words);
+        return $string;
     }
 }

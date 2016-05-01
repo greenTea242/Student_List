@@ -10,7 +10,7 @@
     </nav>
     <div class="col-sm-9">
         <form class="form-horizontal" action="register.php" method="POST">
-            <input type="hidden" name="token" value="<?=htmlspecialchars($abiturient->getToken(), ENT_QUOTES)?>">
+            <input type="hidden" name="token" value="<?=htmlspecialchars($token, ENT_QUOTES)?>">
             <?php if(!empty($errorList['name'])): ?>
                 <div class="control-group has-error">
             <?php endif ?>

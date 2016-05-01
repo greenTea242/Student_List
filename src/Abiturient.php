@@ -35,9 +35,9 @@ class Abiturient
         }
     }
 
-    public function setToken($token)
+    public function setAbiturientID($abiturientID)
     {
-        $this->token = $token;
+        $this->abiturientID = $abiturientID;
     }
 
     /**

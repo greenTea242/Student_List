@@ -8,11 +8,12 @@ require_once "./inc/login.php";
 $validator->addAbiturient($abiturient);
 if($_SERVER["REQUEST_METHOD"] == "POST") {
     /*Проверяем post токен на CSRF*/
-    if (!$authorizator->checkTokenForCSRF($_POST["token"], $abiturient->getToken())) {
+    if (!$tokenHelper->checkTokenForCSRF($_POST["token"], $token)) {
         throw new Exception("The token is not verified. Possible CSRF.");
     }
     /*Массив свойств для заполнения модели*/
     $properties = [
+        "token",
         "email",
         "groupNumber",
         "name",
@@ -46,10 +47,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         /*Если студент первый раз на сайте*/
         /*Добавляем его в бд*/
-        $gateway->addAbiturient($abiturient);
+        $abiturient = $gateway->addAbiturient($abiturient);
         /*Ставим куки*/
-        $authorizator->setAbiturientIDToCookie($gateway->getLastInsertID());
-        $authorizator->setTokenToCookie($abiturient->getToken());
+        $authorizator->logIn($abiturient->getAbiturientID(), $abiturient->getToken());
         /*Делаем редирект*/
         header("Location: index.php?notify=registred");
         exit();

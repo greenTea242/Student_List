@@ -8,7 +8,8 @@ set_exception_handler(function($exception) {
     header('HTTP/1.1 503 Service Temporarily Unavailable');
     header('Status: 503 Service Temporarily Unavailable');
     error_log($exception->__toString(), 0);
-    include($_SERVER["DOCUMENT_ROOT"] . "/templates/error.html");
+    $pageTitle = "Ошибка";
+    include(__DIR__ . "/../templates/error.html");
 });
 
 /*Инициализация нашей базы и создания DataGateway объекта*/
@@ -23,3 +24,4 @@ $gateway = new AbiturientDataGateway($link);
 $validator = new AbiturientValidator($gateway);
 /*Создаем класс работы с куки и тоже внедряем маппер*/
 $authorizator = new Authorization($gateway);
+$tokenHelper  = new TokenHelper($gateway);

@@ -17,12 +17,14 @@ class AbiturientDataGateway {
         $stmt = $this->pdo->prepare($query);
         /*Добавляем данные одним массивом*/
         $stmt->execute($this->convertAbiturientToArray($abiturient));
+        /*Заполняем модель полученным айди и возвращаем ее*/
+        $abiturient->setAbiturientID($this->getLastInsertID());
+        return $abiturient;
     }
 
     /*Метод выборки по ID*/
     public function selectAbiturient($abiturientID)
     {
-        /*Запрос выборки*/
         $query = "SELECT *
                     FROM abiturient
                    WHERE abiturientID=:abiturientID";
@@ -92,7 +94,7 @@ class AbiturientDataGateway {
     }
 
     /*Метод получения последнего добавленго в базу ID*/
-    public function getLastInsertID()
+    private function getLastInsertID()
     {
         return $this->pdo->lastInsertId();
     }
@@ -203,6 +205,22 @@ class AbiturientDataGateway {
         $stmt = $this->pdo->prepare($query);
         $stmt->bindValue(":abiturientID", $abiturientID);
         $stmt->bindValue(":token",        $token);
+        $stmt->execute();
+        $counter = $stmt->fetchColumn();
+        if ($counter == 1) {;
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    /*Метод проверки существованяи токена*/
+    public function isTokenExist($token)
+    {
+        $query = "SELECT COUNT(*)
+                    FROM abiturient
+                   WHERE token = :token";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->bindValue(":token", $token);
         $stmt->execute();
         $counter = $stmt->fetchColumn();
         if ($counter == 1) {;

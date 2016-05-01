@@ -9,7 +9,7 @@ if (isset($_GET["action"])      &&
     isset($_GET["token"])       &&
     $abiturient->isAbiturientRegistred()) {
     /*Проверяем get токен на CSRF*/
-    if (!$authorizator->checkTokenForCSRF($_GET["token"], $abiturient->getToken())) {
+    if (!$tokenHelper->checkTokenForCSRF($_GET["token"], $token)) {
         throw new Exception("The token is not verified. Possible CSRF.");
     }
     $authorizator->logOut();
@@ -25,8 +25,6 @@ $order    = isset($_GET["order"])  ? strval($_GET["order"])  : "desc";
 $search   = isset($_GET["search"]) ? strval($_GET["search"]) : "";
 /*Считаем количество абитуриентов в бд*/
 $numberOfAbiturients = $gateway->countAbiturients($search);
-/*Количество записей на одной странице*/
-$recordsPerPage = 16;
 /*Создаем класс pager*/
 $pager = new Pager($numberOfAbiturients, $recordsPerPage, 'index.php?page={page}');
 /*Защита от вызова страниц page=Ы, page=-10*/

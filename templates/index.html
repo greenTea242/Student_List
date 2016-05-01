@@ -94,10 +94,18 @@
                 <?php endif; ?>
                 <?php foreach($abiturients as $abiturient): ?>
                     <tr>
-                        <td><?=ViewHelper::paintFound($abiturient->getName(),        $search)?></td>
-                        <td><?=ViewHelper::paintFound($abiturient->getSurname(),     $search)?></td>
-                        <td><?=ViewHelper::paintFound($abiturient->getGroupNumber(), $search)?></td>
-                        <td><?=ViewHelper::paintFound($abiturient->getPoints(),      $search)?></td>
+                        <!--Если есть что искать, обводим найденные слова-->
+                        <?php if ($search): ?>
+                            <td><?=ViewHelper::paintFound($abiturient->getName(),        $search)?></td>
+                            <td><?=ViewHelper::paintFound($abiturient->getSurname(),     $search)?></td>
+                            <td><?=ViewHelper::paintFound($abiturient->getGroupNumber(), $search)?></td>
+                            <td><?=ViewHelper::paintFound($abiturient->getPoints(),      $search)?></td>
+                        <?php else: ?>
+                            <td><?=htmlspecialchars($abiturient->getName(),        ENT_QUOTES)?></td>
+                            <td><?=htmlspecialchars($abiturient->getSurname(),     ENT_QUOTES)?></td>
+                            <td><?=htmlspecialchars($abiturient->getGroupNumber(), ENT_QUOTES)?></td>
+                            <td><?=htmlspecialchars($abiturient->getPoints(),      ENT_QUOTES)?></td>
+                        <?php endif; ?>
                     </tr>
                 <?php endforeach; ?>
             </table>
