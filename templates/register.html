@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link href="./css/style.css" rel="stylesheet">
+    <link href="./css/bootstrap/bootstrap.css" rel="stylesheet">
+    <title>Регистрация</title>
+</head>
+<body>
+<div class="container">
+    <nav class="navbar navbar-default" role="navigation">
+        <?php require_once("/inc/header.html"); ?>
+    </nav>
+    <div class="col-sm-9">
+        <form class="form-horizontal" action="register.php" method="POST">
+            <?php if(!empty($errorList['name'])): ?>
+                <div class="control-group has-error">
+            <?php endif ?>
+                    <label class="col-sm-4 control-label" for="name">Введите имя</label>
+                    <div class="col-sm-5 panel">
+                        <input type="text" class="form-control" id="name" name="name"
+                               pattern="<?=$validator->getRegExpForName()?>"
+                               title="Введите правильное имя! Допустимы русские буквы, &quot - &quot(дефис) и &quot ' &quot(апостроф)."
+                               value="<?=htmlspecialchars($abiturient->getName(), ENT_QUOTES)?>"
+                               maxlength="60" placeholder="Имя" required autofocus>
+                    <?php if(!empty($errorList['name'])): ?>
+                        <span class="help-block"><?php echo "Ошибка: {$errorList['name']}"?></span>
+                    <?php endif ?>
+                    </div>
+            <?php if(!empty($errorList['name'])): ?>
+                </div>
+            <?php endif ?>
+            <?php if(!empty($errorList['surname'])): ?>
+                <div class="control-group has-error">
+            <?php endif ?>
+                    <label class="col-sm-4 control-label" for="surname">Введите фамилию</label>
+                    <div class="col-sm-5 panel">
+                        <input type="text" class="form-control" id="surname" name="surname"
+                               pattern="<?=$validator->getRegExpForName()?>"
+                               title="Введите правильное имя! Допустимы русские буквы, &quot - &quot(дефис) и &quot ' &quot(апостроф)."
+                               value="<?=htmlspecialchars($abiturient->getSurname(), ENT_QUOTES)?>"
+                               maxlength="60" placeholder="Фамилия" required>
+                    <?php if(!empty($errorList['surname'])): ?>
+                        <span class="help-block"><?php echo "Ошибка: {$errorList['surname']}"?></span>
+                    <?php endif ?>
+                    </div>
+            <?php if(!empty($errorList['surname'])): ?>
+                </div>
+            <?php endif ?>
+            <?php if(!empty($errorList['groupNumber'])): ?>
+                <div class="control-group has-error">
+            <?php endif ?>
+                    <label class="col-sm-4 control-label" for="groupNumber">Введите номер группы</label>
+                    <div class="col-sm-5 panel">
+                        <input type="text" class="form-control" id="groupNumber" name="groupNumber"
+                               pattern="<?=$validator->getRegExpForGroupNumber()?>"
+                               title="Название группы должно состоять из русских букв и цифр!"
+                               value="<?=htmlspecialchars($abiturient->getGroupNumber(), ENT_QUOTES)?>"
+                               maxlength="5"  placeholder="Номер группы" required>
+                    <?php if(!empty($errorList['groupNumber'])): ?>
+                        <span class="help-block"><?php echo "Ошибка: {$errorList['groupNumber']}"?></span>
+                    <?php endif ?>
+                    </div>
+            <?php if(!empty($errorList['groupNumber'])): ?>
+                </div>
+            <?php endif ?>
+            <?php if(!empty($errorList['points'])): ?>
+                <div class="control-group has-error">
+            <?php endif ?>
+                    <label class="col-sm-4 control-label" for="points">Введите количество баллов ЕГЭ</label>
+                    <div class="col-sm-5 panel">
+                        <input type="number" class="form-control" id="points" name="points" min="0" max="999"
+                               pattern="<?=$validator->getRegExpForPoints()?>"
+                               value="<?=htmlspecialchars($abiturient->getPoints(), ENT_QUOTES)?>"
+                               placeholder="Количество баллов" required>
+                    <?php if(!empty($errorList['points'])): ?>
+                        <span class="help-block"><?php echo "Ошибка: {$errorList['points']}"?></span>
+                    <?php endif ?>
+                    </div>
+            <?php if(!empty($errorList['points'])): ?>
+                </div>
+            <?php endif ?>
+            <?php if(!empty($errorList['email'])): ?>
+                <div class="control-group has-error">
+            <?php endif ?>
+                    <label class="col-sm-4 control-label" for="email">Введите e-mail</label>
+                    <div class="col-sm-5 panel">
+                        <input type="text" class="form-control" id="email" name="email"
+                               pattern="<?=$validator->getRegExpForEmail()?>"
+                               value="<?=htmlspecialchars($abiturient->getEmail(), ENT_QUOTES)?>"
+                               placeholder="Электронный ящик" required>
+                    <?php if(!empty($errorList['email'])): ?>
+                        <span class="help-block"><?php echo "Ошибка: {$errorList['email']}"?></span>
+                    <?php endif ?>
+                    </div>
+            <?php if(!empty($errorList['email'])): ?>
+                </div>
+            <?php endif ?>
+            <?php if(!empty($errorList['year'])): ?>
+                <div class="control-group has-error">
+            <?php endif ?>
+                <label class="col-sm-4 control-label" for="year">Введите год рождения</label>
+                <div class="col-sm-5 panel">
+                    <input type="number" class="form-control" id="year" name="year" min="1901" max="2003"
+                           pattern="<?=$validator->getRegExpForYear()?>"
+                           value="<?=htmlspecialchars($abiturient->getYear(), ENT_QUOTES)?>"
+                           placeholder="Год рождения" required>
+                <?php if(!empty($errorList['year'])): ?>
+                    <span class="help-block"><?php echo "Ошибка: {$errorList['year']}"?></span>
+                <?php endif ?>
+                </div>
+            <?php if(!empty($errorList['year'])): ?>
+                </div>
+            <?php endif ?>
+            <div class="form-group">
+                <div class="col-sm-offset-4 col-sm-8">
+                    <div>Ваш пол?</div>
+                    <div class="radio">
+                        <?php if (!empty($abiturient->getGender())): ?>
+                            <?php if ($abiturient->getGender() == Abiturient::GENDER_MALE): ?>
+                                <label><input type="radio" name="gender" value="<?=Abiturient::GENDER_MALE?>" checked required>Мужской</label>
+                                <label><input type="radio" name="gender" value="<?=Abiturient::GENDER_FEMALE?>" required>Женский</label>
+                            <?php else: ?>
+                                <label><input type="radio" name="gender" value="<?=Abiturient::GENDER_MALE?>" required>Мужской</label>
+                                <label><input type="radio" name="gender" value="<?=Abiturient::GENDER_FEMALE?>" checked required>Женский</label>
+                            <?php endif ?>
+                        <?php else: ?>
+                            <label><input type="radio" name="gender" value="<?=Abiturient::GENDER_MALE?>" required>Мужской</label>
+                            <label><input type="radio" name="gender" value="<?=Abiturient::GENDER_FEMALE?>" required>Женский</label>
+                        <?php endif; ?>
+                    </div>
+                    <?php if(!empty($errorList['gender'])): ?>
+                    <div class="control-group has-error">
+                        <span class="help-block"><?php echo "Ошибка: {$errorList['gender']}"?></span>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-4 col-sm-8">
+                    <div>Ваше место жительства?</div>
+                    <div class="radio">
+                        <?php if (!empty($abiturient->getLoko())): ?>
+                            <?php if ($abiturient->getLoko() == Abiturient::CITY_LOCAL): ?>
+                                <label><input type="radio" name="loko" value="<?=Abiturient::CITY_LOCAL?>" checked required>Местный</label>
+                                <label><input type="radio" name="loko" value="<?=Abiturient::CITY_NONRESIDENT?>" >Иногородний</label>
+                            <?php else: ?>
+                                <label><input type="radio" name="loko" value="<?=Abiturient::CITY_LOCAL?>" required>Местный</label>
+                                <label><input type="radio" name="loko" value="<?=Abiturient::CITY_NONRESIDENT?>" checked required>Иногородний</label>
+                            <?php endif ?>
+                        <?php else: ?>
+                            <label><input type="radio" name="loko" value="<?=Abiturient::CITY_LOCAL?>" required>Местный</label>
+                            <label><input type="radio" name="loko" value="<?=Abiturient::CITY_NONRESIDENT?>" required>Иногородний</label>
+                        <?php endif; ?>
+                    </div>
+                    <?php if(!empty($errorList['loko'])): ?>
+                        <div class="control-group has-error">
+                            <span class="help-block"><?php echo "Ошибка: {$errorList['loko']}"?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-4 col-sm-8">
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
