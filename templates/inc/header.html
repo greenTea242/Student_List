@@ -1,6 +1,12 @@
-<div class="navbar-header">
-    <span class="navbar-brand"><?=$pageTitle?></span>
-</div>
-<ul class="nav navbar-nav">
-    <?php require_once("/navigationMenu.html"); ?>
-</ul>
+<!DOCTYPE html>
+<html lang="ru">
+<?php require_once __DIR__ . "/head.html"; ?>
+<body>
+<div class="container">
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="navbar-header">
+            <span class="navbar-brand"><?=$pageTitle?></span>
+        </div>
+        <ul class="nav navbar-nav">
+            <?php require_once __DIR__ . "/navigationMenu.html"; ?>
+        </ul>

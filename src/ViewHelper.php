@@ -32,42 +32,43 @@ class ViewHelper {
     static function paintFound($string, $search)
     {
         $string = htmlspecialchars($string, ENT_QUOTES);
-        $search = htmlspecialchars($search, ENT_QUOTES);
-        /*Если строка запроса состоит из нескольких слов, мы должны проверить каждое*/
-        $searchWords = preg_split("/[^\\w]+/ui", $search);
+        if (empty($search)) {
+            return $string;
+        }
+        /*Делаем из строки, которая будет будущей регуляркой, массив слов*/
+        $searchWords = preg_split("/[^\\w'-]+/ui", $search);
         /*Сортируем массив по убыванию значений*/
         usort($searchWords, function($a, $b) {
             return mb_strlen($b) - mb_strlen($a);
         });
-        /*Попытка через анонимную функцию*/
-        /**
-        $searchWords = array_map(function($search) {
-            $v = "/" . preg_quote($search) . "/ui";
-            return $search;
+        /*Экранируем знаки для будущей регулярки*/
+        $searchWords = array_map(function($searchWord) {
+            $searchWord = preg_quote($searchWord);
+            return $searchWord;
         }, $searchWords);
-        $string = preg_replace_callback($searchWords, function (array $matches) {
-            var_dump($matches);
-            return "<mark>$matches[0]</mark>";
-        }, $string);
-         */
-        /**
-         * С таблицей будем работать как с поисковой строкой  - мы
-         * будем проверять каждое слово по отдельности.
-         * Знаков препинания там быть не может в отличие от поисковой строки,
-         * поэтому explode с пробелом, а не preg_split со знаками.
-         */
-        $words = explode(" ", $string);
-        foreach ($words as &$word) {
-            foreach ($searchWords as $search) {
-                if (mb_strripos($word, $search) !== false) {
-                    if (preg_match("<mark>", $word)) {
-                        continue;
-                    }
-                    $word = preg_replace("/" . preg_quote($search) . "/ui", "<mark>$0</mark>", $word);
-                }
-            }
-        }
-        $string = implode(" ", $words);
+        $searchWords = implode("|", $searchWords);
+        $string = preg_replace("/" . $searchWords . "/ui", "<mark>$0</mark>", $string);
         return $string;
+    }
+
+    /*Метод переверота треугольника (sic!)*/
+    static function getSymbolForOrder($order)
+    {
+        if ($order == "asc") {
+            /*Возвращаем треугольник*/
+            return "[&#9650;]";
+        }
+        /*Возвращаем перевернутый треугольник*/
+        return "[&#9660;]";
+    }
+
+    /*Метод выставления атрибута checked в html*/
+    static function isInputChecked($genderOfAbiturient, $valueFromInput)
+    {
+        if (empty($genderOfAbiturient) ||
+            strcmp($genderOfAbiturient, $valueFromInput) !== 0) {
+            return false;
+        }
+        return "checked";
     }
 }

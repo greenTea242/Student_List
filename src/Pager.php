@@ -50,4 +50,16 @@ class Pager {
             return FALSE;
         }
     }
+
+    /*Метод получения списка доступных для навигации страниц*/
+    public function getListOfVisiblePages($myPage)
+    {
+        $visiblePages = [];
+        for ($page = $myPage - 2; $page <= $myPage + 2; $page++) {
+            if ($this->checkPossiblePages($page)) {
+                $visiblePages[] = $page;
+            }
+        }
+        return $visiblePages;
+    }
 }

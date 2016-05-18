@@ -1,19 +1,15 @@
 <?php
 
 /*Подключаем необходимые нам файлы*/
-require_once "../src/ini.php";
-require_once "./inc/login.php";
+require_once __DIR__ . "/../src/ini.php";
 
-/*Добавляем абитуриента в валидатор*/
-$validator->addAbiturient($abiturient);
 if($_SERVER["REQUEST_METHOD"] == "POST") {
-    /*Проверяем post токен на CSRF*/
-    if (!$tokenHelper->checkTokenForCSRF($_POST["token"], $token)) {
+    /*Проверяем POST токен на CSRF*/
+    if (!$tokenHelper->check_CSRF_token($_POST["CSRF_token"], $CSRF_token)) {
         throw new Exception("The token is not verified. Possible CSRF.");
     }
     /*Массив свойств для заполнения модели*/
     $properties = [
-        "token",
         "email",
         "groupNumber",
         "name",
@@ -32,9 +28,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
     /*Инициализурем свойства объекта*/
-    $abiturient->setProperties($values);
-    /*Проверяем на ошибки*/
-    $errorList = $validator->createErrorsList();
+    $abiturient->setProperties($values, $authToken);
+    /*Добавляем студента для проверки*/
+    $errorList = $validator->createErrorsList($abiturient);
     /*Если ошибок нет*/
     if (empty($errorList)) {
         /*Если студент редактирует данные*/
@@ -49,7 +45,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         /*Добавляем его в бд*/
         $abiturient = $gateway->addAbiturient($abiturient);
         /*Ставим куки*/
-        $authorizator->logIn($abiturient->getAbiturientID(), $abiturient->getToken());
+        $authorizator->logIn($authToken, $CSRF_token);
         /*Делаем редирект*/
         header("Location: index.php?notify=registred");
         exit();
@@ -58,4 +54,4 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 /*Название шапки*/
 $pageTitle = "Регистрация";
 /*Вставляем шаблон*/
-include "../templates/register.html";
+require_once __DIR__ . "/../templates/register.html";

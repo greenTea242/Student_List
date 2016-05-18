@@ -1,21 +1,13 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <?php require_once("/inc/head.html"); ?>
-</head>
-<body>
-<div class="container">
-    <nav class="navbar navbar-default" role="navigation">
-        <?php require_once("/inc/header.html"); ?>
-        <?php require_once("/inc/search.html"); ?>
+<?php require_once __DIR__ . "/inc/header.html"; ?>
+        <?php require_once __DIR__ . "/inc/search.html"; ?>
     </nav>
         <?php if (!empty($notify) == Notifications::NOTIFY_REGISTERED): ?>
             <p>Поздравляем с успешной регистрацией!</p>
         <?php endif; ?>
             <!--Если студент что-то ищет в поисковой форме-->
         <?php if (!empty($search)): ?>
-            <p>Показаны только абитуриенты, найденные по запросу "<?=$search?>".</p>
-                <?php if(empty($abiturients)): ?>
+            <p>Показаны только абитуриенты, найденные по запросу "<?=htmlspecialchars($search, ENT_QUOTES)?>".</p>
+                <?php if (empty($abiturients)): ?>
                     <p>Ничего не найдено!</p>
                 <?php endif; ?>
         <!--Если в бд нету записей-->
@@ -24,94 +16,50 @@
         <!--Если абитуриент не получил список (ввел page=235 при меньшем количестве страниц)-->
         <?php elseif (empty($abiturients)): ?>
             <p>Страница не найдена!</p>
-            <p><a href="<?=$_SERVER['PHP_SELF']?>">Показать всех абитуриентов.</a></p>
+            <p><a href="<?=htmlspeacialchars($indexHref, ENT_QUORES)?>">Показать всех абитуриентов.</a></p>
         <?php endif; ?>
         <?php if (!empty($abiturients)): ?>
             <table class="table table-bordered table-hover">
                 <?php if (!empty($abiturients)): ?>
                     <tr>
-                        <?php if ($sort == "name"): ?>
-                            <?php if ($order == "asc"): ?>
-                                <th>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'name', $myPage, 'desc'), ENT_QUOTES)?>">Имя</a>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'name', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>">[&#9650]</a>
-                                </th>
-                            <?php else: ?>
-                                <th>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'name', $myPage, 'desc'), ENT_QUOTES)?>">Имя</a>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'name', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>">[&#9660]</a>
-                                </th>
+                        <th>
+                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'name', $myPage, 'desc'), ENT_QUOTES)?>">Имя</a>
+                            <?php if ($sort == "name"): ?>
+                                <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'name', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>"><?=ViewHelper::getSymbolForOrder($order)?></a>
                             <?php endif; ?>
-                        <?php else: ?>
-                            <th><a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'name', $myPage, 'desc'), ENT_QUOTES)?>">Имя</a></th>
-                        <?php endif; ?>
-                        <?php if ($sort == "surname"): ?>
-                            <?php if ($order == "asc"): ?>
-                                <th>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'surname', $myPage, 'desc'), ENT_QUOTES)?>">Фамилия</a>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'surname', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>">[&#9650]</a>
-                                </th>
-                            <?php else: ?>
-                                <th>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'surname', $myPage, 'desc'), ENT_QUOTES)?>">Фамилия</a>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'surname', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>">[&#9660]</a>
-                                </th>
+                        </th>
+                        <th>
+                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'surname', $myPage, 'desc'), ENT_QUOTES)?>">Фамилия</a>
+                            <?php if ($sort == "surname"): ?>
+                                <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'surname', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>"><?=ViewHelper::getSymbolForOrder($order)?></a>
                             <?php endif; ?>
-                        <?php else: ?>
-                            <th><a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'surname', $myPage, 'desc'), ENT_QUOTES)?>">Фамилия</a></th>
-                        <?php endif; ?>
-                        <?php if ($sort == "groupNumber"): ?>
-                            <?php if ($order == "asc"): ?>
-                                <th>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'groupNumber', $myPage, 'desc'), ENT_QUOTES)?>">Номер группы</a>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'groupNumber', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>">[&#9650]</a>
-                                </th>
-                            <?php else: ?>
-                                <th>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'groupNumber', $myPage, 'desc'), ENT_QUOTES)?>">Номер группы</a>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'groupNumber', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>">[&#9660]</a>
-                                </th>
+                        </th>
+                        <th>
+                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'groupNumber', $myPage, 'desc'), ENT_QUOTES)?>">Номер группы</a>
+                            <?php if ($sort == "groupNumber"): ?>
+                                <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'groupNumber', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>"><?=ViewHelper::getSymbolForOrder($order)?></a>
                             <?php endif; ?>
-                        <?php else: ?>
-                            <th><a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'groupNumber', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>">Номер группы</a></th>
-                        <?php endif; ?>
-                        <?php if ($sort == "points"): ?>
-                            <?php if ($order == "asc"): ?>
-                                <th>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'points', $myPage, 'desc'), ENT_QUOTES)?>">Баллы</a>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'points', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>">[&#9650]</a>
-                                </th>
-                            <?php else: ?>
-                                <th>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'points', $myPage, 'desc'), ENT_QUOTES)?>">Баллы</a>
-                                    <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'points', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>">[&#9660]</a>
-                                </th>
+                        </th>
+                        <th>
+                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'points', $myPage, 'desc'), ENT_QUOTES)?>">Баллы</a>
+                            <?php if ($sort == "points"): ?>
+                                <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'points', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>"> <?=ViewHelper::getSymbolForOrder($order)?></a>
                             <?php endif; ?>
-                        <?php else: ?>
-                            <th><a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'points', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>">Баллы</a></th>
-                        <?php endif; ?>
+                        </th>
                     </tr>
                 <?php endif; ?>
                 <?php foreach($abiturients as $abiturient): ?>
                     <tr>
-                        <!--Если есть что искать, обводим найденные слова-->
-                        <?php if ($search): ?>
-                            <td><?=ViewHelper::paintFound($abiturient->getName(),        $search)?></td>
-                            <td><?=ViewHelper::paintFound($abiturient->getSurname(),     $search)?></td>
-                            <td><?=ViewHelper::paintFound($abiturient->getGroupNumber(), $search)?></td>
-                            <td><?=ViewHelper::paintFound($abiturient->getPoints(),      $search)?></td>
-                        <?php else: ?>
-                            <td><?=htmlspecialchars($abiturient->getName(),        ENT_QUOTES)?></td>
-                            <td><?=htmlspecialchars($abiturient->getSurname(),     ENT_QUOTES)?></td>
-                            <td><?=htmlspecialchars($abiturient->getGroupNumber(), ENT_QUOTES)?></td>
-                            <td><?=htmlspecialchars($abiturient->getPoints(),      ENT_QUOTES)?></td>
-                        <?php endif; ?>
+                        <td><?=ViewHelper::paintFound($abiturient->getName(),        $search)?></td>
+                        <td><?=ViewHelper::paintFound($abiturient->getSurname(),     $search)?></td>
+                        <td><?=ViewHelper::paintFound($abiturient->getGroupNumber(), $search)?></td>
+                        <td><?=ViewHelper::paintFound($abiturient->getPoints(),      $search)?></td>
                     </tr>
                 <?php endforeach; ?>
             </table>
         <?php endif; ?>
         <?php if (!empty($search)): ?>
-            <p><a href="<?=$_SERVER['PHP_SELF']?>">Показать всех абитуриентов.</a></p>
+            <p><a href="<?=htmlspecialchars($indexHref, ENT_QUOTES)?>">Показать всех абитуриентов.</a></p>
         <?php endif; ?>
         <!--Если страниц больше одной - нужна постраничная навигация-->
         <?php if($pager->getTotalPages() > 1 && $pager->checkPossiblePages($myPage)): ?>
@@ -120,10 +68,7 @@
                 <?php for ($pageNum = 1; $pageNum <= $pager->getTotalPages(); $pageNum++): ?>
                     <?php if ($pageNum == $myPage): ?>
                         <li class="active"><a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, $sort, $pageNum, $order), ENT_QUOTES)?>"><?=$pageNum?></a></li>
-                    <?php elseif ($pageNum == $myPage + 1 ||
-                                  $pageNum == $myPage - 1 ||
-                                  $pageNum == $myPage + 2 ||
-                                  $pageNum == $myPage - 2): ?>
+                    <?php elseif (in_array($pageNum, $visiblePages)): ?>
                         <li><a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, $sort, $pageNum, $order), ENT_QUOTES)?>"><?=$pageNum?></a></li>
                     <!--Если находимся на первой странице-->
                     <?php elseif ($pageNum == 1): ?>
@@ -135,6 +80,4 @@
                 <?php endfor; ?>
             </ul>
         <?php endif; ?>
-</div>
-</body>
-</html>
+<?php require_once __DIR__ . "/inc/footer.html"; ?>

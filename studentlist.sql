@@ -32,10 +32,10 @@ CREATE TABLE `abiturient` (
   `year` year(4) NOT NULL,
   `loko` enum('yes','no') NOT NULL,
   `abiturientID` int(4) NOT NULL AUTO_INCREMENT,
-  `token` varchar(32) NOT NULL,
+  `authToken` varchar(32) NOT NULL,
   PRIMARY KEY (`abiturientID`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=173 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -57,4 +57,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-04-30 22:15:07
+-- Dump completed on 2016-05-18 13:10:47

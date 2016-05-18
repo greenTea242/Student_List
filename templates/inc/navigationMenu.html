@@ -3,7 +3,7 @@
     <li><a href='index.php'>Главная страница</a></li>
 <?php elseif ($abiturient->isAbiturientRegistred()): ?>
     <li><a href='register.php'>Отредактировать данные?</a></li>
-    <li><a href="index.php?action=logout&amp;token=<?=$abiturient->getToken()?>">Выход</a></li>
+    <li><a href="index.php?action=logout&amp;CSRF_token=<?=$CSRF_token?>">Выход</a></li>
 <?php else: ?>
     <li><a href='register.php'>Зарегистрируйтесь?</a></li>
 <?php endif; ?>

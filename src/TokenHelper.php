@@ -8,7 +8,7 @@ class TokenHelper {
         $this->gateway = $gateway;
     }
     /*Метод создания случайного токена*/
-    public function createToken()
+    public function createToken($tokenForCSRF = false)
     {
         $token = "";
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -18,28 +18,21 @@ class TokenHelper {
                 $symbol = substr($chars, mt_rand(0, $numChars - 1), 1);
                 $token = $token . $symbol;
             }
-            if (!$this->gateway->isTokenExist($token)) {
+            /*Токены для CSRF не хранятся в базе*/
+            if (!$tokenForCSRF &&
+                !$this->gateway->isAbiturientExist($token)) {
                 return $token;
             }
         }
-        throw new Exception("All tokens are occupied. 2.2726579e+57 records!");
+        throw new Exception("All tokens are occupied. 2.2726579e+57 students!");
     }
 
     /*Метод проверки токена для защиты от CSRF*/
-    public function checkTokenForCSRF($token, $cookieToken)
+    public function check_CSRF_token($CSRF_token, $cookie_CSRF_token)
     {
-        if((strcmp($token, $cookieToken) !== 0)) {
+        if((strcmp($CSRF_token, $cookie_CSRF_token) !== 0)) {
             return false;
         }
         return true;
-    }
-
-    /*Метод проверки существования токена*/
-    public function isTokenExist($token)
-    {
-        if ($this->gateway->isTokenExist($token)) {
-            return true;
-        }
-        return false;
     }
 }

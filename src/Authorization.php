@@ -9,27 +9,25 @@ class Authorization {
         $this->gateway = $gateway;
     }
 
-    public function getStudent($abiturientID)
+    public function logIn($authToken, $CSRF_token)
     {
-        return $this->gateway->selectAbiturient($abiturientID);
+        setcookie("authToken",  $authToken,  time() + (10 * 365 * 24 * 60 * 60), "", "", "", 1);
+        setcookie("CSRF_token", $CSRF_token, time() + (10 * 365 * 24 * 60 * 60), "", "", "", 1);
     }
 
-
-    public function logIn($abiturientID, $token)
+    public function checkCookie($authToken)
     {
-        setcookie("abiturientID", $abiturientID, time() + (10 * 365 * 24 * 60 * 60), "", "", "", 1);
-        $this->setToken($token);
-    }
-
-    public function setToken($token)
-    {
-        setcookie("token", $token, time() + (10 * 365 * 24 * 60 * 60), "", "", "", 1);
+        if (empty($authToken)        ||
+            !$this->gateway->isAbiturientExist($authToken)) {
+            return false;
+        }
+        return true;
     }
 
     /*Метод удаления куки*/
     public function logOut()
     {
-        setcookie("abiturientID", "", time() - 3600);
-        setcookie("token",        "", time() - 3600);
+        setcookie("authToken",  "", time() - 3600);
+        setcookie("CSRF_token", "", time() - 3600);
     }
 }

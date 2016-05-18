@@ -2,7 +2,6 @@
 
 /*Класс обнаружения ошибок*/
 class AbiturientValidator {
-    private $abiturient;
     private $gateway;
 
     public function __construct(AbiturientDataGateway $gateway)
@@ -10,14 +9,8 @@ class AbiturientValidator {
         $this->gateway = $gateway;
     }
 
-    /*Добавление нового абитуриента*/
-    public function addAbiturient(Abiturient $abiturient)
-    {
-        $this->abiturient = $abiturient;
-    }
-
-    /*Метод создания списка ошибок который потом будет выводиться в шаблоне*/
-    public function createErrorsList()
+    /*Метод создания списка ошибок которые потом будут выводиться в шаблоне*/
+    public function createErrorsList(Abiturient $abiturient)
     {
         $properties = [
             "email",
@@ -32,7 +25,7 @@ class AbiturientValidator {
         $errList = [];
         foreach ($properties as $property) {
             $method = "check" . ucfirst($property);
-            $error = $this->$method();
+            $error = $this->$method($abiturient);
             if ($error !== TRUE) {
                 $errList[$property] = $error;
             }
@@ -41,10 +34,10 @@ class AbiturientValidator {
     }
 
     /*Метод проверки e-mail*/
-    private function checkEmail()
+    private function checkEmail(Abiturient $abiturient)
     {
-        $email        = $this->abiturient->getEmail();
-        $abiturientID = $this->abiturient->getAbiturientID();
+        $email        = $abiturient->getEmail();
+        $abiturientID = $abiturient->getAbiturientID();
         $regexp       = $this->getPHPRegExpForEmail();
         if (!preg_match($regexp, $email)) {
             return "Неправильно введен почтовый ящик!";
@@ -58,9 +51,9 @@ class AbiturientValidator {
     }
 
     /*Метод проверки номера группы*/
-    private function checkGroupNumber()
+    private function checkGroupNumber(Abiturient $abiturient)
     {
-        $group  = $this->abiturient->getGroupNumber();
+        $group  = $abiturient->getGroupNumber();
         $regexp = $this->getPHPRegExpForGroupNumber();
         if (!preg_match($regexp, $group)) {
             return "Название группы должно состоять из русских букв и цифр!";
@@ -72,9 +65,9 @@ class AbiturientValidator {
     }
 
     /*Метод проверки имени*/
-    private function checkName()
+    private function checkName(Abiturient $abiturient)
     {
-        $name = $this->abiturient->getName();
+        $name = $abiturient->getName();
         $regexp = $this->getPHPRegExpForName();
         if (!preg_match($regexp, $name)) {
             return "Введите правильное имя! Допустимы русские буквы, \" - \"(дефис) и \" ' \"(апостроф).";
@@ -84,9 +77,9 @@ class AbiturientValidator {
     }
 
     /*Метод проверки фамилии*/
-    private function checkSurname()
+    private function checkSurname(Abiturient $abiturient)
     {
-        $name = $this->abiturient->getSurname();
+        $name = $abiturient->getSurname();
         /*Регулярка для имени и фамилии идентична*/
         $regexp = $this->getPHPRegExpForName();
         if (!preg_match($regexp, $name)) {
@@ -97,9 +90,9 @@ class AbiturientValidator {
     }
 
     /*Метод проверки года рождения*/
-    private function checkYear()
+    private function checkYear(Abiturient $abiturient)
     {
-        $year = $this->abiturient->getYear();
+        $year = $abiturient->getYear();
         $regexp = $this->getPHPRegExpForYear();
         if (!preg_match($regexp, $year)) {
             return "Введите корректный год рождения! Пример: 1994.";
@@ -109,9 +102,9 @@ class AbiturientValidator {
     }
 
     /*Метод проверки количества очков*/
-    private function checkPoints()
+    private function checkPoints(Abiturient $abiturient)
     {
-        $points = $this->abiturient->getPoints();
+        $points = $abiturient->getPoints();
         $regexp = $this->getPHPRegExpForPoints();
         if (!preg_match($regexp, $points)) {
             return "Введите корректное количество баллов! От 0 до 999.";
@@ -121,9 +114,9 @@ class AbiturientValidator {
     }
 
     /*Метод проверки пола*/
-    private function checkGender()
+    private function checkGender(Abiturient $abiturient)
     {
-        if (empty($this->abiturient->getGender())) {
+        if (empty($abiturient->getGender())) {
             return "Укажите ваш пол.";
         } else {
             return TRUE;
@@ -131,9 +124,9 @@ class AbiturientValidator {
     }
 
     /*Метод проверки места жительства*/
-    private function checkLoko()
+    private function checkLoko(Abiturient $abiturient)
     {
-        if (empty($this->abiturient->getLoko())) {
+        if (empty($abiturient->getLoko())) {
             return "Укажите ваше место жительства.";
         } else {
             return TRUE;
@@ -148,7 +141,7 @@ class AbiturientValidator {
 
     public function getPHPRegExpForGroupNumber()
     {
-        return "/^([\\s]*[А-Яа-я0-9][\\s]*){2,5}$/u";
+        return "/^([\\s]*[А-Яа-яЕё0-9][\\s]*){2,5}$/u";
 
     }
 
@@ -175,7 +168,7 @@ class AbiturientValidator {
 
     public function getHTML5RegExpForGroupNumber()
     {
-        return "^([\\s]*[А-Яа-я0-9][\\s]*){2,5}$";
+        return "^([\\s]*[А-Яа-яЕё0-9][\\s]*){2,5}$";
     }
 
     public function getHTML5RegExpForName()

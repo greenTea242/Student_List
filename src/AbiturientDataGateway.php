@@ -12,8 +12,8 @@ class AbiturientDataGateway {
     public function addAbiturient(Abiturient $abiturient)
     {
         $query = "INSERT INTO abiturient
-                             (name, surname, gender, groupNumber, points, email, year, loko, token)
-                              VALUES (:name, :surname, :gender, :groupNumber, :points, :email, :year, :loko, :token)";
+                             (name, surname, gender, groupNumber, points, email, year, loko, authToken)
+                              VALUES (:name, :surname, :gender, :groupNumber, :points, :email, :year, :loko, :authToken)";
         $stmt = $this->pdo->prepare($query);
         /*Добавляем данные одним массивом*/
         $stmt->execute($this->convertAbiturientToArray($abiturient));
@@ -22,14 +22,14 @@ class AbiturientDataGateway {
         return $abiturient;
     }
 
-    /*Метод выборки по ID*/
-    public function selectAbiturient($abiturientID)
+    /*Метод выборки по токену*/
+    public function selectAbiturient($authToken)
     {
         $query = "SELECT *
                     FROM abiturient
-                   WHERE abiturientID=:abiturientID";
+                   WHERE authToken = :authToken";
         $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(":abiturientID", $abiturientID);
+        $stmt->bindValue(":authToken", $authToken);
         $stmt->execute();
         $stmt->setFetchMode(PDO::FETCH_CLASS, "Abiturient");
         $abiturient = $stmt->fetch();
@@ -47,9 +47,9 @@ class AbiturientDataGateway {
                          groupNumber  = :groupNumber,
                          points       = :points,
                          year         = :year,
-                         loko         = :loko,
-                         token        = :token
-                   WHERE abiturientID = :abiturientID";
+                         loko         = :loko
+                   WHERE abiturientID = :abiturientID AND
+                         authToken    = :authToken";
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($this->convertAbiturientToArray($abiturient));
     }
@@ -66,7 +66,7 @@ class AbiturientDataGateway {
             "points"       => $abiturient->getPoints(),
             "year"         => $abiturient->getYear(),
             "loko"         => $abiturient->getLoko(),
-            "token"        => $abiturient->getToken()
+            "authToken"    => $abiturient->getAuthToken()
         ];
         /*Если абитуриент зарегистрирован, бд не будет создавать ему новый ID*/
         if ($abiturient->isAbiturientRegistred()) {
@@ -158,7 +158,7 @@ class AbiturientDataGateway {
     private function fixSearchString($search)
     {
         /*Меняем в строке поиска пробелы и знаки препинания на знак любого символа в поиске бд*/
-        $search = preg_replace("/[^\\w\\d]+/u", "%", $search);
+        $search = preg_replace("/[^\\w\\d-']+/u", "%", $search);
         /*Два процента впереди и в конце должны быть в любом случае*/
         return "%$search%";
     }
@@ -184,8 +184,8 @@ class AbiturientDataGateway {
                     ORDER BY $sort $order
                     LIMIT :limit OFFSET :offset";
         $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(":limit",  $limit,  PDO::PARAM_INT);
-        $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
+        $stmt->bindValue(":limit",  (int)$limit,  PDO::PARAM_INT);
+        $stmt->bindValue(":offset", (int)$offset, PDO::PARAM_INT);
         if (!empty($searchQuery)) {
             $stmt->bindValue(":search", $search);
         }
@@ -195,38 +195,20 @@ class AbiturientDataGateway {
         return $abiturients;
     }
 
-    /*Метод проверки существования абитурента с определенным ID и токеном*/
-    public function isAbiturientExist($abiturientID, $token)
+    /*Метод проверки существования абитурента с определенным токеном*/
+    public function isAbiturientExist($authToken)
     {
         $query = "SELECT COUNT(*)
                     FROM abiturient
-                   WHERE abiturientID = :abiturientID AND
-                         token        = :token";
+                   WHERE authToken = :authToken";
         $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(":abiturientID", $abiturientID);
-        $stmt->bindValue(":token",        $token);
+        $stmt->bindValue(":authToken", $authToken);
         $stmt->execute();
         $counter = $stmt->fetchColumn();
-        if ($counter == 1) {;
+        if ($counter > 0) {
             return TRUE;
         }
         return FALSE;
     }
 
-    /*Метод проверки существованяи токена*/
-    public function isTokenExist($token)
-    {
-        $query = "SELECT COUNT(*)
-                    FROM abiturient
-                   WHERE token = :token";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(":token", $token);
-        $stmt->execute();
-        $counter = $stmt->fetchColumn();
-        if ($counter == 1) {;
-            return TRUE;
-        }
-        return FALSE;
-    }
 }
-

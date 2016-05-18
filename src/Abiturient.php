@@ -10,7 +10,7 @@ class Abiturient
     private $email;
     private $year;
     private $loko; /*местный или иногородний*/
-    private $token;
+    private $authToken;
     private $abiturientID;
 
     const GENDER_MALE        = "male";
@@ -19,12 +19,13 @@ class Abiturient
     const CITY_NONRESIDENT   = "no";
 
     /**
-     * Функционал методов setProperties и setToken не в конструкторе,
+     * Функционал методов setProperties() и setAbiturientID() не в конструкторе,
      * т.к. база возвращает новые объекты (база не будет пересылать
-     * в них переменные)
+     * в них переменные). setAuthToken() не используется в базе, но создан
+     * для симметрии, т.к. его тоже придется использовать отдельно
      */
     /*Метод установки свойств*/
-    public function setProperties(array $values)
+    public function setProperties(array $values, $authToken)
     {
         foreach ($values as $key => $value) {
             if (property_exists("Abiturient", $key)) {
@@ -33,11 +34,17 @@ class Abiturient
                 throw new Exception("Submitted unknown property");
             }
         }
+        $this->setAuthToken($authToken);
     }
 
     public function setAbiturientID($abiturientID)
     {
         $this->abiturientID = $abiturientID;
+    }
+
+    public function setAuthToken($authToken)
+    {
+        $this->authToken = $authToken;
     }
 
     /**
@@ -97,8 +104,8 @@ class Abiturient
         return $this->loko;
     }
 
-    public function getToken()
+    public function getAuthToken()
     {
-        return $this->token;
+        return $this->authToken;
     }
 }
