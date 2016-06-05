@@ -3,16 +3,35 @@
 /*Класс работы с cookie*/
 class Authorization {
     private $gateway;
+    private $tokenHelper;
 
-    public function __construct(AbiturientDataGateway $gateway)
+    public function __construct(AbiturientDataGateway $gateway, TokenHelper $tokenHelper)
     {
-        $this->gateway = $gateway;
+        $this->gateway     = $gateway;
+        $this->tokenHelper = $tokenHelper;
     }
 
-    public function logIn($authToken, $CSRF_token)
+    public function getAbiturient($authToken)
     {
-        setcookie("authToken",  $authToken,  time() + (10 * 365 * 24 * 60 * 60), "", "", "", 1);
-        setcookie("CSRF_token", $CSRF_token, time() + (10 * 365 * 24 * 60 * 60), "", "", "", 1);
+        if ($this->checkCookie($authToken)) {
+            $this->logIn($authToken);
+            return $this->gateway->selectAbiturient($authToken);
+        } else {
+            /**
+             * Если токена нет(студент первый раз) или токен присутсвует в бд(авторизация
+             * до этого момента была провалена, поэтому скорее всего
+             * пользователь - злоумышленник(подделывает другим имена и баллы, бессовестный!)).
+             * В последнем случае его надо заново создать, иначе будет повтор токенов в бд
+             */
+            $authToken = $this->tokenHelper->createToken();
+            $this->logIn($authToken);
+            return new Abiturient();
+        }
+    }
+
+    public function logIn($authToken)
+    {
+        setcookie("authToken", $authToken, time() + (10 * 365 * 24 * 60 * 60), "", "", "", 1);
     }
 
     public function checkCookie($authToken)
@@ -28,6 +47,6 @@ class Authorization {
     public function logOut()
     {
         setcookie("authToken",  "", time() - 3600);
-        setcookie("CSRF_token", "", time() - 3600);
     }
+
 }

@@ -2,7 +2,7 @@
         <?php require_once __DIR__ . "/inc/search.html"; ?>
     </nav>
         <?php if (!empty($notify) == Notifications::NOTIFY_REGISTERED): ?>
-            <p>Поздравляем с успешной регистрацией!</p>
+            <div class="alert alert-success" role="alert">Поздравляю с успешной регистрацией!</div>
         <?php endif; ?>
             <!--Если студент что-то ищет в поисковой форме-->
         <?php if (!empty($search)): ?>
@@ -23,28 +23,16 @@
                 <?php if (!empty($abiturients)): ?>
                     <tr>
                         <th>
-                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'name', $myPage, 'desc'), ENT_QUOTES)?>">Имя</a>
-                            <?php if ($sort == "name"): ?>
-                                <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'name', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>"><?=ViewHelper::getSymbolForOrder($order)?></a>
-                            <?php endif; ?>
+                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'name', $myPage,  $sort == 'name' ? ViewHelper::changeOrder($order) : 'desc'), ENT_QUOTES)?>">Имя <?=($sort == "name") ? ViewHelper::getSymbolForOrder($order) : ""?></a>
                         </th>
                         <th>
-                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'surname', $myPage, 'desc'), ENT_QUOTES)?>">Фамилия</a>
-                            <?php if ($sort == "surname"): ?>
-                                <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'surname', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>"><?=ViewHelper::getSymbolForOrder($order)?></a>
-                            <?php endif; ?>
+                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'surname', $myPage, $sort == 'surname' ? ViewHelper::changeOrder($order) : 'desc'), ENT_QUOTES)?>">Фамилия <?=($sort == "surname") ? ViewHelper::getSymbolForOrder($order) : ""?></a>
                         </th>
                         <th>
-                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'groupNumber', $myPage, 'desc'), ENT_QUOTES)?>">Номер группы</a>
-                            <?php if ($sort == "groupNumber"): ?>
-                                <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'groupNumber', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>"><?=ViewHelper::getSymbolForOrder($order)?></a>
-                            <?php endif; ?>
+                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'groupNumber', $myPage, $sort == 'groupNumber' ? ViewHelper::changeOrder($order) : 'desc'), ENT_QUOTES)?>">Номер группы <?=($sort == "groupNumber") ? ViewHelper::getSymbolForOrder($order) : ""?></a>
                         </th>
                         <th>
-                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'points', $myPage, 'desc'), ENT_QUOTES)?>">Баллы</a>
-                            <?php if ($sort == "points"): ?>
-                                <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'points', $myPage, ViewHelper::changeOrder($order)), ENT_QUOTES)?>"> <?=ViewHelper::getSymbolForOrder($order)?></a>
-                            <?php endif; ?>
+                            <a href="<?=htmlspecialchars(ViewHelper::getSortedLink($search, 'points', $myPage, $sort == 'points' ? ViewHelper::changeOrder($order) : 'desc'), ENT_QUOTES)?>">Баллы <?=($sort == "points") ? ViewHelper::getSymbolForOrder($order) : ""?></a>
                         </th>
                     </tr>
                 <?php endif; ?>

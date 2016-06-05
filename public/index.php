@@ -5,10 +5,10 @@ require_once __DIR__ . "/../src/ini.php";
 /*Если студент собирается выйти из аккаунта*/
 if (isset($_GET["action"])      &&
     $_GET["action"] == "logout" &&
-    isset($_GET["CSRF_token"])  &&
+    isset($_GET["csrfToken"])  &&
     $abiturient->isAbiturientRegistred()) {
     /*Проверяем GET токен на CSRF*/
-    if (!$tokenHelper->check_CSRF_token($_GET["CSRF_token"], $CSRF_token)) {
+    if (!$tokenHelper->checkCsrfToken($_GET["csrfToken"], $csrfToken)) {
         throw new Exception("The token is not verified. Possible CSRF.");
     }
     $authorizator->logOut();
@@ -36,4 +36,4 @@ $pageTitle = "Список студентов";
 /*Ссылка на главную страницу без GET параметров*/
 $indexHref = $_SERVER["PHP_SELF"];
 /*Вставляем шаблон*/
-require_once __DIR__ . "/../templates/index.html";
+require __DIR__ . "/../templates/index.html";

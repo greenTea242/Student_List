@@ -2,7 +2,7 @@
     </nav>
     <div class="col-sm-9">
         <form class="form-horizontal" action="register.php" method="POST">
-            <input type="hidden" name="CSRF_token" value="<?=htmlspecialchars($CSRF_token, ENT_QUOTES)?>">
+            <input type="hidden" name="csrfToken" value="<?=htmlspecialchars($csrfToken, ENT_QUOTES)?>">
             <div class="<?=(!empty($errorList['name'])) ? 'control-group has-error' : '' ?>">
                 <label class="col-sm-4 control-label" for="name">Введите имя</label>
                 <div class="col-sm-5 panel">

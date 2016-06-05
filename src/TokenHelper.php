@@ -8,7 +8,7 @@ class TokenHelper {
         $this->gateway = $gateway;
     }
     /*Метод создания случайного токена*/
-    public function createToken($tokenForCSRF = false)
+    public function createToken($tokenForCsrf = false)
     {
         $token = "";
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -19,7 +19,7 @@ class TokenHelper {
                 $token = $token . $symbol;
             }
             /*Токены для CSRF не хранятся в базе*/
-            if (!$tokenForCSRF &&
+            if (!$tokenForCsrf &&
                 !$this->gateway->isAbiturientExist($token)) {
                 return $token;
             }
@@ -28,11 +28,16 @@ class TokenHelper {
     }
 
     /*Метод проверки токена для защиты от CSRF*/
-    public function check_CSRF_token($CSRF_token, $cookie_CSRF_token)
+    public function checkCsrfToken($csrfToken, $cookieCsrfToken)
     {
-        if((strcmp($CSRF_token, $cookie_CSRF_token) !== 0)) {
+        if((strcmp($csrfToken, $cookieCsrfToken) !== 0)) {
             return false;
         }
         return true;
+    }
+
+    public function setCsrfToken($csrfToken)
+    {
+        setcookie("csrfToken", $csrfToken, time() + (10 * 365 * 24 * 60 * 60), "", "", "", 1);
     }
 }

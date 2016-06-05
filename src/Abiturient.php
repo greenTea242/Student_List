@@ -25,7 +25,7 @@ class Abiturient
      * для симметрии, т.к. его тоже придется использовать отдельно
      */
     /*Метод установки свойств*/
-    public function setProperties(array $values, $authToken)
+    public function setProperties(array $values)
     {
         foreach ($values as $key => $value) {
             if (property_exists("Abiturient", $key)) {
@@ -34,7 +34,6 @@ class Abiturient
                 throw new Exception("Submitted unknown property");
             }
         }
-        $this->setAuthToken($authToken);
     }
 
     public function setAbiturientID($abiturientID)
